@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eu te amo, Xuia!</title>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: Georgia, "Times New Roman", serif;
+      background: #170713;
+      color: white;
+      position: relative;
+    }
+
+    /* Background gradients */
+    #bg-gradient {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255,72,132,0.4), transparent 32%),
+        radial-gradient(circle at 18% 18%, rgba(255,184,202,0.26), transparent 28%),
+        linear-gradient(145deg, #210715 0%, #590922 45%, #13040f 100%);
+      z-index: 0;
+    }
+
+    /* Grid overlay */
+    #bg-grid {
+      position: absolute;
+      inset: 0;
+      opacity: 0.4;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 44px 44px;
+      z-index: 0;
+    }
+
+    /* Falling hearts layer */
+    #hearts-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .falling-heart {
+      position: absolute;
+      top: -12vh;
+      color: #ff8caf;
+      text-shadow: 0 0 14px rgba(255,122,168,0.7);
+      animation-name: fallingHeart;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+    }
+
+    @keyframes fallingHeart {
+      0%   { transform: translate3d(0, -12vh, 0) rotate(-12deg) scale(0.8); }
+      100% { transform: translate3d(var(--drift), 118vh, 0) rotate(28deg) scale(1.1); }
+    }
+
+    /* Main container */
+    #app {
+      position: relative;
+      z-index: 20;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    /* ── LOADING STATE ── */
+    #loading-state {
+      width: 100%;
+      max-width: 28rem;
+      animation: loadingEnter 0.7s ease both;
+    }
+
+    @keyframes loadingEnter {
+      from { opacity: 0; transform: translateY(18px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .loading-ring {
+      margin: 0 auto 2rem;
+      width: 7rem;
+      height: 7rem;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.10);
+      box-shadow: 0 0 80px rgba(255,68,128,0.36);
+      border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+    }
+
+    .ring-heart {
+      font-size: 4rem;
+      color: #ff4f87;
+      text-shadow: 0 0 28px rgba(255,79,135,0.85);
+      animation: heartBeat 1.05s ease-in-out infinite;
+    }
+
+    .progress-bar {
+      height: 0.75rem;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.12);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    #progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #fec2c2, #f9a8d4, #ef4444);
+      box-shadow: 0 0 30px rgba(255,86,135,0.85);
+      transition: width 150ms ease-out;
+    }
+
+    #progress-text {
+      font-size: clamp(3rem, 8vw, 4.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── FINAL STATE ── */
+    #final-state {
+      display: none;
+      position: relative;
+      max-width: 36rem;
+      animation: loveReveal 1.1s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes loveReveal {
+      0%   { opacity: 0; transform: translateY(34px) scale(0.9); filter: blur(12px); }
+      72%  { filter: blur(0); }
+      100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+
+    /* Sparkles burst */
+    #sparkle-origin {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 7rem;
+      height: 7rem;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .sparkle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border-radius: 50%;
+      background: #ffe4ed;
+      box-shadow: 0 0 22px rgba(255,208,221,0.95);
+      animation: sparkleBurst 0.95s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes sparkleBurst {
+      0%   { opacity: 1; transform: translate(-50%,-50%) rotate(var(--angle)) translateX(0) scale(1); }
+      100% { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateX(var(--dist)) scale(0); }
+    }
+
+    .love-lines {
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      font-weight: 700;
+      line-height: 1.45;
+      letter-spacing: 0.02em;
+      text-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      margin-bottom: 2rem;
+    }
+
+    .love-lines p { margin-bottom: 0.6rem; }
+
+    .final-heart {
+      font-size: clamp(5rem, 14vw, 9rem);
+      color: #ff4f87;
+      text-shadow: 0 0 46px rgba(255,79,135,0.95);
+      animation: heartBeat 1.05s ease-in-out infinite;
+    }
+
+    /* Shared */
+    @keyframes heartBeat {
+      0%,100% { transform: scale(1); }
+      18%     { transform: scale(1.16); }
+      34%     { transform: scale(0.96); }
+      52%     { transform: scale(1.1); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="bg-gradient"></div>
+  <div id="bg-grid"></div>
+  <div id="hearts-container"></div>
+
+  <div id="app">
+
+    <!-- Loading -->
+    <div id="loading-state">
+      <div class="loading-ring">
+        <span class="ring-heart">♥</span>
+      </div>
+      <div class="progress-bar">
+        <div id="progress-fill"></div>
+      </div>
+      <div id="progress-text">0%</div>
+    </div>
+
+    <!-- Final -->
+    <div id="final-state">
+      <div id="sparkle-origin"></div>
+      <div class="love-lines">
+        <p>Eu te amo infinito, Xuia!</p>
+        <p>Serei para sempre só seu.</p>
+        <p>Feliz dia dos namorados 💚</p>
+      </div>
+      <div class="final-heart">♥</div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ── Falling hearts (spawn all, animate after reveal) ── */
+    const heartsContainer = document.getElementById('hearts-container');
+    const HEART_COUNT = 58;
+
+    for (let i = 0; i < HEART_COUNT; i++) {
+      const el = document.createElement('span');
+      el.className = 'falling-heart';
+      el.textContent = '♥';
+
+      const left     = Math.random() * 100;
+      const size     = 16 + Math.random() * 28;
+      const delay    = Math.random() * 5;
+      const duration = 4  + Math.random() * 5;
+      const drift    = -42 + Math.random() * 84;
+      const opacity  = 0.42 + Math.random() * 0.5;
+
+      el.style.cssText = `
+        left: ${left}%;
+        font-size: ${size}px;
+        animation-delay: ${delay}s;
+        animation-duration: ${duration}s;
+        opacity: ${opacity};
+        --drift: ${drift}px;
+        animation-play-state: paused;
+      `;
+
+      heartsContainer.appendChild(el);
+    }
+
+    /* ── Sparkles ── */
+    const sparkleOrigin = document.getElementById('sparkle-origin');
+    const SPARKLE_COUNT = 22;
+
+    for (let i = 0; i < SPARKLE_COUNT; i++) {
+      const el = document.createElement('span');
+      el.className = 'sparkle';
+
+      const angle    = (360 / SPARKLE_COUNT) * i;
+      const dist     = 90 + Math.random() * 120;
+      const size     = 6  + Math.random() * 9;
+      const delay    = Math.random() * 0.16;
+
+      el.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        animation-delay: ${delay}s;
+        --angle: ${angle}deg;
+        --dist: ${dist}px;
+        animation-play-state: paused;
+      `;
+
+      sparkleOrigin.appendChild(el);
+    }
+
+    /* ── Progress bar ── */
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const loadingState = document.getElementById('loading-state');
+    const finalState   = document.getElementById('final-state');
+
+    let progress = 0;
+
+    const timer = setInterval(() => {
+      progress = Math.min(progress + 1, 100);
+      progressFill.style.width = `${progress}%`;
+      progressText.textContent  = `${progress}%`;
+
+      if (progress >= 100) {
+        clearInterval(timer);
+
+        setTimeout(() => {
+          /* Hide loading */
+          loadingState.style.display = 'none';
+
+          /* Show final */
+          finalState.style.display = 'block';
+
+          /* Trigger sparkles */
+          sparkleOrigin.querySelectorAll('.sparkle').forEach(s => {
+            s.style.animationPlayState = 'running';
+          });
+
+          /* Start hearts rain */
+          heartsContainer.querySelectorAll('.falling-heart').forEach(h => {
+            h.style.animationPlayState = 'running';
+          });
+
+        }, 150);
+      }
+    }, 42);
+  </script>
+
+</body>
+</html>
